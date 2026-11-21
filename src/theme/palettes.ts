@@ -78,6 +78,10 @@ export type ColorPalette = {
   memoryKey: string;
   memoryKeyText: string;
 
+  /** Calculation history entry card background and outline (Tape Record). */
+  historyCard: string;
+  historyCardBorder: string;
+
   /** Focus ring and selected-operator border. */
   focus: string;
 };
@@ -121,6 +125,9 @@ export const sageClassic: ColorPalette = {
   memoryKey: '#8C907E',
   memoryKeyText: '#E9EADB',
 
+  historyCard: '#162916',
+  historyCardBorder: '#213B21',
+
   focus: '#F5A623',
 };
 
@@ -162,6 +169,9 @@ export const midnightOled: ColorPalette = {
   memoryBarBorder: '#9A9E8C',
   memoryKey: '#8C907E',
   memoryKeyText: '#E9EADB',
+
+  historyCard: '#162916',
+  historyCardBorder: '#213B21',
 
   focus: '#F5A01A',
 };

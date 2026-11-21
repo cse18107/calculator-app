@@ -125,6 +125,8 @@ export const dimensions = {
   borderWidth: 1,
   /** Memory bar height (design: 32). */
   memoryBarHeight: 32,
+  /** Header HISTORY button height. The drawn pill; hit slop brings the touch target to minTouchTarget. */
+  historyButtonHeight: 26,
   /** Memory key height (design: 26). */
   memoryKeyHeight: 26,
   /** Memory key corner radius (design: 4). */
@@ -137,6 +139,12 @@ export const dimensions = {
   modeButtonRadius: 10,
   /** Mode button hard bottom edge, in px (design: 2.5). */
   modeEdgeOffset: 2.5,
+  /** Tape Record filter tab height (design: 26). */
+  historyTabHeight: 26,
+  /** Tape Record action tile height (design: 56). */
+  historyActionTileHeight: 56,
+  /** Tape Record bottom action button height (design: 32). Below minTouchTarget; hit slop covers it. */
+  historyBarButtonHeight: 32,
   maxContentWidth: 480,
 } as const;
 

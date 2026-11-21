@@ -1,10 +1,16 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { useTheme } from '@/theme/ThemeProvider';
 
+export type BrandBadgeProps = {
+  /** Optional control shown at the right end of the row, after the power status. */
+  trailing?: ReactNode;
+};
+
 /** Product name and power status line above the display, as in the design. */
-export function BrandBadge() {
+export function BrandBadge({ trailing }: BrandBadgeProps) {
   const theme = useTheme();
 
   return (
@@ -20,9 +26,12 @@ export function BrandBadge() {
       <Text size="micro" weight="bold" style={{ color: theme.colors.textSecondary }}>
         STANDARD CALC
       </Text>
-      <Text size="micro" weight="regular" style={{ color: theme.colors.textMuted }}>
-        AUTO POWER OFF
-      </Text>
+      <View style={[styles.end, { gap: theme.spacing.sm }]}>
+        <Text size="micro" weight="regular" style={{ color: theme.colors.textMuted }}>
+          AUTO POWER OFF
+        </Text>
+        {trailing}
+      </View>
     </View>
   );
 }
@@ -31,6 +40,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  end: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
 });

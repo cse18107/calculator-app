@@ -27,7 +27,15 @@ const palettes: Record<string, ColorPalette> = { sageClassic, midnightOled };
  * accessibility review changes the design. The spec lists them under "Accessibility review".
  */
 const DOCUMENTED_DESIGN_CONTRAST_GAPS: Record<string, readonly string[]> = {
-  sageClassic: ['keyDigitText/keyDigit', 'keyAccentText/keyAccent', 'textSecondary/background'],
+  sageClassic: [
+    'keyDigitText/keyDigit',
+    'keyAccentText/keyAccent',
+    'textSecondary/background',
+    // Calculation history line (Step 2). Same colour as the design; see the spec's accessibility exception.
+    'displayHistoryText/displayBackground',
+  ],
+  // midnightOled reuses light values until a dark design exists (see palettes.ts), so its gaps are listed too.
+  midnightOled: ['displayHistoryText/displayBackground', 'textPrimary/memoryBar'],
 };
 
 const CONTRAST_PAIRS = [
@@ -41,6 +49,10 @@ const CONTRAST_PAIRS = [
   ['keyAccentText', 'keyAccent'],
   ['keyDangerText', 'keyDanger'],
   ['keyModeText', 'keyMode'],
+  ['displayHistoryText', 'displayBackground'],
+  ['keyAccent', 'displayBackground'],
+  ['background', 'textPrimary'],
+  ['textPrimary', 'memoryBar'],
 ] as const;
 
 describe.each(Object.entries(palettes))('%s palette', (name, palette) => {

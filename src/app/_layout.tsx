@@ -8,6 +8,7 @@ import {
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { AppStateProvider } from '@/features/calculator/AppStateProvider';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 
 export default function RootLayout() {
@@ -25,8 +26,10 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }} />
+      <AppStateProvider>
+        <StatusBar style="auto" />
+        <Stack screenOptions={{ headerShown: false }} />
+      </AppStateProvider>
     </ThemeProvider>
   );
 }

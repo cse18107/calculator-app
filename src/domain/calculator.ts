@@ -27,6 +27,14 @@ export type CalculatorAction =
  */
 export type CalculatorStatus = 'entry' | 'operator' | 'result' | 'error';
 
+/** A calculation finished by `=`, ready to be recorded in history. */
+export type CompletedCalculation = {
+  /** Display-formatted expression ending with "=", e.g. "1,250 + 4,890.5 =". */
+  expression: string;
+  /** Plain decimal string of the result, e.g. "6140.5". */
+  result: string;
+};
+
 export type CalculatorState = {
   /** Raw entry text without separators, e.g. "12.", "-5", "0". */
   entry: string;
@@ -35,6 +43,10 @@ export type CalculatorState = {
   /** The last operation and its right operand, used by repeated equals. */
   repeat: { operator: Operator; operand: number } | null;
   status: CalculatorStatus;
+  /** Committed operands and operators of the current calculation, e.g. ["2", "×", "3", "+"]. */
+  tokens: string[];
+  /** Set only by a successful `=`. Every other action clears it. */
+  lastCompletion: CompletedCalculation | null;
 };
 
 export type DisplayModel = {
@@ -61,6 +73,8 @@ export const initialCalculatorState: CalculatorState = {
   operator: null,
   repeat: null,
   status: 'entry',
+  tokens: [],
+  lastCompletion: null,
 };
 
 const ERROR_STATE: CalculatorState = { ...initialCalculatorState, status: 'error' };
@@ -70,6 +84,15 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
     return action.type === 'clearEntry' ? initialCalculatorState : state;
   }
 
+  const next = applyAction(state, action);
+  if (action.type === 'equals' || next === state) {
+    return next;
+  }
+  // Only the `=` that produced a completion may carry it; any other action clears it.
+  return next.lastCompletion === null ? next : { ...next, lastCompletion: null };
+}
+
+function applyAction(state: CalculatorState, action: CalculatorAction): CalculatorState {
   switch (action.type) {
     case 'digit':
       return enterDigit(state, action.digit);
@@ -179,18 +202,38 @@ function startEntry(state: CalculatorState, entry: string): CalculatorState {
 
 function pressOperator(state: CalculatorState, operator: Operator): CalculatorState {
   if (state.status === 'operator') {
-    return { ...state, operator };
+    // Replaces the operator that was just pressed; its operand was already committed.
+    return { ...state, operator, tokens: [...state.tokens.slice(0, -1), OPERATOR_SYMBOLS[operator]] };
   }
+
+  // Commit the operand that is on screen, then the operator, to the expression.
+  const tokens = [...state.tokens, formatNumber(state.entry), OPERATOR_SYMBOLS[operator]];
 
   if (state.status === 'entry' && state.operator !== null && state.left !== null) {
     const result = compute(state.left, state.operator, Number(state.entry));
     if (result === null) {
       return ERROR_STATE;
     }
-    return { entry: toPlainString(result), left: result, operator, repeat: null, status: 'operator' };
+    return {
+      entry: toPlainString(result),
+      left: result,
+      operator,
+      repeat: null,
+      status: 'operator',
+      tokens,
+      lastCompletion: null,
+    };
   }
 
-  return { entry: state.entry, left: Number(state.entry), operator, repeat: null, status: 'operator' };
+  return {
+    entry: state.entry,
+    left: Number(state.entry),
+    operator,
+    repeat: null,
+    status: 'operator',
+    tokens,
+    lastCompletion: null,
+  };
 }
 
 function pressEquals(state: CalculatorState): CalculatorState {
@@ -200,21 +243,36 @@ function pressEquals(state: CalculatorState): CalculatorState {
     if (result === null) {
       return ERROR_STATE;
     }
+    const resultText = toPlainString(result);
     return {
-      entry: toPlainString(result),
+      entry: resultText,
       left: null,
       operator: null,
       repeat: { operator: state.operator, operand: right },
       status: 'result',
+      tokens: [],
+      lastCompletion: {
+        expression: [...state.tokens, formatNumber(state.entry), '='].join(' '),
+        result: resultText,
+      },
     };
   }
 
   if (state.operator === null && state.repeat !== null && state.status === 'result') {
-    const result = compute(Number(state.entry), state.repeat.operator, state.repeat.operand);
+    const { operator, operand } = state.repeat;
+    const result = compute(Number(state.entry), operator, operand);
     if (result === null) {
       return ERROR_STATE;
     }
-    return { ...state, entry: toPlainString(result) };
+    const resultText = toPlainString(result);
+    return {
+      ...state,
+      entry: resultText,
+      lastCompletion: {
+        expression: `${formatNumber(state.entry)} ${OPERATOR_SYMBOLS[operator]} ${formatNumber(toPlainString(operand))} =`,
+        result: resultText,
+      },
+    };
   }
 
   return state;
