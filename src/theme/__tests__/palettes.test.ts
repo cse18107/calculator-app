@@ -20,26 +20,46 @@ function contrast(foreground: string, background: string): number {
 
 const palettes: Record<string, ColorPalette> = { sageClassic, midnightOled };
 
-describe.each(Object.entries(palettes))('%s palette', (_name, palette) => {
+/**
+ * Contrast pairs the design itself does not meet. `sageClassic` matches the design
+ * exactly (design fidelity is the priority for this phase), so these pairs are
+ * documented instead of being changed. Each one must stay below 4.5:1 until the
+ * accessibility review changes the design. The spec lists them under "Accessibility review".
+ */
+const DOCUMENTED_DESIGN_CONTRAST_GAPS: Record<string, readonly string[]> = {
+  sageClassic: ['keyDigitText/keyDigit', 'keyAccentText/keyAccent', 'textSecondary/background'],
+};
+
+const CONTRAST_PAIRS = [
+  ['textPrimary', 'background'],
+  ['textPrimary', 'surface'],
+  ['textSecondary', 'background'],
+  ['displayText', 'displayBackground'],
+  ['displaySecondaryText', 'displayBackground'],
+  ['keyDigitText', 'keyDigit'],
+  ['keyFunctionText', 'keyFunction'],
+  ['keyAccentText', 'keyAccent'],
+  ['keyDangerText', 'keyDanger'],
+  ['keyModeText', 'keyMode'],
+] as const;
+
+describe.each(Object.entries(palettes))('%s palette', (name, palette) => {
   it('defines only valid #RRGGBB colors', () => {
     for (const value of Object.values(palette)) {
       expect(value).toMatch(/^#[0-9A-F]{6}$/i);
     }
   });
 
-  it.each([
-    ['textPrimary', 'background'],
-    ['textPrimary', 'surface'],
-    ['textSecondary', 'background'],
-    ['displayText', 'displayBackground'],
-    ['displaySecondaryText', 'displayBackground'],
-    ['keyDigitText', 'keyDigit'],
-    ['keyFunctionText', 'keyFunction'],
-    ['keyAccentText', 'keyAccent'],
-    ['keyDangerText', 'keyDanger'],
-    ['keyModeText', 'keyMode'],
-  ] as const)('%s on %s meets WCAG AA (4.5:1)', (text, background) => {
-    expect(contrast(palette[text], palette[background])).toBeGreaterThanOrEqual(4.5);
+  it.each(CONTRAST_PAIRS)('%s on %s meets WCAG AA (4.5:1) unless documented as a design gap', (text, background) => {
+    const ratio = contrast(palette[text], palette[background]);
+    const documented = DOCUMENTED_DESIGN_CONTRAST_GAPS[name]?.includes(`${text}/${background}`) ?? false;
+
+    if (documented) {
+      // Keep the gap visible: if the colour changes and passes, remove it from the list.
+      expect(ratio).toBeLessThan(4.5);
+    } else {
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });
 

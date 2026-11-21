@@ -15,7 +15,9 @@ export type CalculatorAction =
   | { type: 'percent' }
   | { type: 'toggleSign' }
   | { type: 'clearEntry' }
-  | { type: 'backspace' };
+  | { type: 'backspace' }
+  /** Places a value (from memory recall) into the entry, as if it had been typed. */
+  | { type: 'recall'; value: number };
 
 /**
  * - `entry`: the user is typing the current number.
@@ -85,7 +87,26 @@ export function calculatorReducer(state: CalculatorState, action: CalculatorActi
       return { ...state, entry: '0', status: 'entry', repeat: null };
     case 'backspace':
       return backspace(state);
+    case 'recall':
+      return recallValue(state, action.value);
   }
+}
+
+/**
+ * The number the display currently shows, or null while the display shows an error.
+ * Memory operations use this value.
+ */
+export function getDisplayedValue(state: CalculatorState): number | null {
+  if (state.status === 'error') {
+    return null;
+  }
+  const value = Number(state.entry);
+  return Number.isFinite(value) ? value : null;
+}
+
+/** Rounds a value to the display's 12 significant digits. Returns null when it cannot be shown. */
+export function roundToDisplay(raw: number): number | null {
+  return finalize(raw);
 }
 
 /** Formats a raw entry or result for display: thousands separators, sign and trailing "." kept. */
@@ -100,14 +121,28 @@ export function formatNumber(raw: string): string {
   return `${negative ? '-' : ''}${grouped}${fraction}`;
 }
 
+/**
+ * The operator of the calculation in progress, or null. It stays pending from the
+ * operator press until `=`, including while the right operand is being typed.
+ */
+export function getPendingOperator(state: CalculatorState): Operator | null {
+  if (state.left === null || state.operator === null) {
+    return null;
+  }
+  return state.status === 'operator' || state.status === 'entry' ? state.operator : null;
+}
+
 export function getDisplay(state: CalculatorState): DisplayModel {
   if (state.status === 'error') {
     return { primary: 'Error', secondary: null, isError: true };
   }
 
+  // The expression line (e.g. "34 +") and the current input are independent:
+  // the expression is kept while the right operand is typed into the primary value.
+  const pending = getPendingOperator(state);
   const secondary =
-    state.status === 'operator' && state.left !== null && state.operator !== null
-      ? `${formatNumber(toPlainString(state.left))} ${OPERATOR_SYMBOLS[state.operator]}`
+    pending !== null && state.left !== null
+      ? `${formatNumber(toPlainString(state.left))} ${OPERATOR_SYMBOLS[pending]}`
       : null;
 
   return { primary: formatNumber(state.entry), secondary, isError: false };
@@ -222,6 +257,18 @@ function backspace(state: CalculatorState): CalculatorState {
   const trimmed = state.entry.slice(0, -1);
   const entry = trimmed === '' || trimmed === '-' || trimmed === '-0' ? '0' : trimmed;
   return { ...state, entry };
+}
+
+/**
+ * Places a recalled value into the entry, using the same rules as typing:
+ * after a result it starts a new calculation, after an operator it becomes the
+ * right operand, and in the entry state it replaces the current entry.
+ */
+function recallValue(state: CalculatorState, value: number): CalculatorState {
+  if (!Number.isFinite(value)) {
+    return state;
+  }
+  return startEntry(state, toPlainString(value));
 }
 
 function compute(left: number, operator: Operator, right: number): number | null {

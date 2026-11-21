@@ -1,78 +1,127 @@
 /**
- * Color palettes for the two base themes shown in `designs/`.
+ * Color palettes for the two base themes.
  *
- * Values are approximations read from the design screenshots, not sampled
- * from the source files. Refine them against the Figma/source assets when the
- * Themes feature is specified.
+ * `sageClassic` (light) matches the OpenPencil design "Column - Basic calculator"
+ * exactly. Design fidelity is the priority for this phase, so its colours are not
+ * adjusted for contrast. Known contrast gaps are listed in
+ * `src/theme/__tests__/palettes.test.ts` and in the spec.
+ *
+ * `midnightOled` (dark) has no design yet. Its new keys reuse the light values
+ * until a dark design exists.
  *
  * Every palette MUST define exactly the keys of `ColorPalette`. The tests in
  * `palettes.test.ts` enforce this and the contrast of key text pairs.
  */
 
 export type ColorPalette = {
-  /** Device/app canvas behind the calculator body. */
+  /** Phone canvas behind the calculator body. */
   background: string;
-  /** Raised panel that holds the keypad. */
+  /** Keypad bed (the raised panel that holds the keys). */
   surface: string;
-  /** Border and divider color on surfaces. */
+  /** Outline of the phone body and similar frames. */
   border: string;
 
-  /** Primary body text on `background`/`surface`. */
+  /** Primary text (labels, function-key symbols). */
   textPrimary: string;
-  /** Secondary, de-emphasised text (labels, captions). */
+  /** Secondary text (brand badge, bold label). */
   textSecondary: string;
+  /** Tertiary text (brand badge, "AUTO POWER OFF"). */
+  textMuted: string;
 
-  /** Display (LCD) area background. */
+  /** Display (LCD) panel background. */
   displayBackground: string;
-  /** Main result text on the display. */
+  /** Display panel border (2px inside). */
+  displayBorder: string;
+  /** Main result value and the active mode label ("BASIC"). */
   displayText: string;
-  /** Expression/history text on the display. */
+  /** Expression line on the display (e.g. "1,250 +"). */
   displaySecondaryText: string;
+  /** History line on the display. */
+  displayHistoryText: string;
+  /** Inactive mode label ("STANDARD MODE"). */
+  displayModeText: string;
+  /** Inactive indicator ("MEM" when no memory is stored). */
+  displayInactiveText: string;
 
-  /** Digit keys (0-9, decimal point). */
+  /** Digit keys (0-9). */
   keyDigit: string;
   keyDigitText: string;
-  /** Light function keys (±, ÷, =, etc.). */
+  /** Hard bottom edge under digit keys. */
+  keyDigitEdge: string;
+  /** Light function keys (±, ÷, ×, −, +, ., =). */
   keyFunction: string;
   keyFunctionText: string;
-  /** Accent operator keys (%, backspace, parentheses). */
+  /** Hard bottom edge under function keys. */
+  keyFunctionEdge: string;
+  /** Accent keys (%, backspace). */
   keyAccent: string;
   keyAccentText: string;
-  /** Destructive key (CE / clear). */
+  /** Hard bottom edge under accent keys. */
+  keyAccentEdge: string;
+  /** Destructive key (CE). */
   keyDanger: string;
   keyDangerText: string;
-  /** Mode switch keys (Converter, Scientific). */
+  /** Hard bottom edge under the CE key. */
+  keyDangerEdge: string;
+  /** Mode buttons (Converter, Scientific). */
   keyMode: string;
   keyModeText: string;
+  /** Hard bottom edge under mode buttons. */
+  keyModeEdge: string;
 
-  /** Focus ring and selection highlight. */
+  /** Outline of the keypad bed. */
+  keypadBorder: string;
+  /** Memory bar background and outline. */
+  memoryBar: string;
+  memoryBarBorder: string;
+  /** Memory key background and label. */
+  memoryKey: string;
+  memoryKeyText: string;
+
+  /** Focus ring and selected-operator border. */
   focus: string;
 };
 
 export const sageClassic: ColorPalette = {
-  background: '#B9BDA8',
-  surface: '#C8CCB7',
-  border: '#9EA391',
+  background: '#B9BDA9',
+  surface: '#C9CDB8',
+  border: '#A6AA98',
 
-  textPrimary: '#1E2320',
-  textSecondary: '#353C30',
+  textPrimary: '#2C3028',
+  textSecondary: '#686E60',
+  textMuted: '#7B8173',
 
-  displayBackground: '#0E1A0F',
-  displayText: '#F5A01A',
-  displaySecondaryText: '#C07A12',
+  displayBackground: '#0C1A0C',
+  displayBorder: '#050C05',
+  displayText: '#F5A623',
+  displaySecondaryText: '#B87714',
+  displayHistoryText: '#7B4E0C',
+  displayModeText: '#9B6512',
+  displayInactiveText: '#54380B',
 
-  keyDigit: '#5F6A56',
+  keyDigit: '#7C8473',
   keyDigitText: '#FFFFFF',
-  keyFunction: '#E8EBDD',
-  keyFunctionText: '#1E2320',
-  keyAccent: '#F29E14',
-  keyAccentText: '#1E2320',
-  keyDanger: '#C93A42',
+  keyDigitEdge: '#565D4F',
+  keyFunction: '#E9EADB',
+  keyFunctionText: '#2C3028',
+  keyFunctionEdge: '#BCBEAC',
+  keyAccent: '#F39C12',
+  keyAccentText: '#FFFFFF',
+  keyAccentEdge: '#C97E0A',
+  keyDanger: '#D63B47',
   keyDangerText: '#FFFFFF',
-  keyMode: '#3D7889',
+  keyDangerEdge: '#A8252F',
+  keyMode: '#3F7E93',
   keyModeText: '#FFFFFF',
+  keyModeEdge: '#285B6B',
 
-  focus: '#F5A01A',
+  keypadBorder: '#BCBFAC',
+  memoryBar: '#A8AC9A',
+  memoryBarBorder: '#9A9E8C',
+  memoryKey: '#8C907E',
+  memoryKeyText: '#E9EADB',
+
+  focus: '#F5A623',
 };
 
 export const midnightOled: ColorPalette = {
@@ -82,21 +131,37 @@ export const midnightOled: ColorPalette = {
 
   textPrimary: '#E9EFE6',
   textSecondary: '#9DB0A0',
+  textMuted: '#9DB0A0',
 
   displayBackground: '#0A140D',
+  displayBorder: '#050C05',
   displayText: '#F5A01A',
   displaySecondaryText: '#C07A12',
+  displayHistoryText: '#7B4E0C',
+  displayModeText: '#9B6512',
+  displayInactiveText: '#54380B',
 
   keyDigit: '#2A3A2E',
   keyDigitText: '#FFFFFF',
+  keyDigitEdge: '#565D4F',
   keyFunction: '#33463A',
   keyFunctionText: '#E9EFE6',
+  keyFunctionEdge: '#BCBEAC',
   keyAccent: '#F29E14',
   keyAccentText: '#1E2320',
+  keyAccentEdge: '#C97E0A',
   keyDanger: '#C93A42',
   keyDangerText: '#FFFFFF',
+  keyDangerEdge: '#A8252F',
   keyMode: '#3D7889',
   keyModeText: '#FFFFFF',
+  keyModeEdge: '#285B6B',
+
+  keypadBorder: '#BCBFAC',
+  memoryBar: '#A8AC9A',
+  memoryBarBorder: '#9A9E8C',
+  memoryKey: '#8C907E',
+  memoryKeyText: '#E9EADB',
 
   focus: '#F5A01A',
 };

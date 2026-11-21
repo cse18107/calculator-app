@@ -4,6 +4,7 @@ import {
   calculatorReducer,
   formatNumber,
   getDisplay,
+  getPendingOperator,
   initialCalculatorState,
   type Operator,
 } from '../calculator';
@@ -121,9 +122,54 @@ describe('operators and equals', () => {
     expect(getDisplay(state)).toEqual({ primary: '1,250', secondary: '1,250 +', isError: false });
   });
 
-  it('shows no secondary line once a right operand is being typed', () => {
+  it('keeps the expression line while the right operand is typed', () => {
     const state = press(...typed('1250'), op('add'), ...typed('4'));
-    expect(getDisplay(state).secondary).toBeNull();
+    expect(getDisplay(state)).toEqual({ primary: '4', secondary: '1,250 +', isError: false });
+  });
+});
+
+describe('expression line during a calculation', () => {
+  const OP_SYMBOL: Record<Operator, string> = { add: '+', subtract: '−', multiply: '×', divide: '÷' };
+
+  it.each([
+    ['add', '34', '22', '56'],
+    ['subtract', '34', '22', '12'],
+    ['multiply', '34', '22', '748'],
+    ['divide', '34', '22', '1.54545454545'],
+  ] as const)('34 → operator → 22 → = keeps the expression until = (%s)', (operator, left, right, result) => {
+    let state = press(...typed(left));
+    expect(getDisplay(state)).toEqual({ primary: '34', secondary: null, isError: false });
+
+    state = run(state, op(operator));
+    expect(getDisplay(state)).toEqual({ primary: '34', secondary: `34 ${OP_SYMBOL[operator]}`, isError: false });
+
+    state = run(state, ...typed(right));
+    expect(getDisplay(state)).toEqual({ primary: '22', secondary: `34 ${OP_SYMBOL[operator]}`, isError: false });
+    expect(getPendingOperator(state)).toBe(operator);
+
+    state = run(state, EQUALS);
+    expect(getDisplay(state)).toEqual({ primary: formatNumber(result), secondary: null, isError: false });
+    expect(getPendingOperator(state)).toBeNull();
+  });
+
+  it('keeps the expression when the right operand is cleared with CE', () => {
+    const state = press(...typed('34'), op('add'), ...typed('22'), { type: 'clearEntry' });
+    expect(getDisplay(state)).toEqual({ primary: '0', secondary: '34 +', isError: false });
+  });
+
+  it('a chained operator shows the running total as the new expression', () => {
+    const state = press(...typed('34'), op('add'), ...typed('22'), op('multiply'));
+    expect(getDisplay(state)).toEqual({ primary: '56', secondary: '56 ×', isError: false });
+  });
+
+  it('replacing the operator keeps the expression with the new symbol', () => {
+    const state = press(...typed('34'), op('add'), op('subtract'));
+    expect(getDisplay(state).secondary).toBe('34 −');
+  });
+
+  it('is cleared by a completed calculation and by an error', () => {
+    expect(getDisplay(press(...typed('5'), op('divide'), ...typed('0'), EQUALS)).secondary).toBeNull();
+    expect(getDisplay(press(...typed('34'), op('add'), ...typed('22'), EQUALS)).secondary).toBeNull();
   });
 });
 

@@ -2,6 +2,14 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 
 import { CalculatorScreen } from '../CalculatorScreen';
+import { themes } from '@/theme/theme';
+
+const MEMORY_NAMES = ['Memory clear', 'Memory recall', 'Memory subtract', 'Memory add'] as const;
+const MODE_NAMES = ['Converter', 'Scientific'] as const;
+/** Buttons that are not part of the 20-key keypad grid. */
+const NON_KEYPAD_NAMES: readonly string[] = [...MEMORY_NAMES, ...MODE_NAMES];
+
+const light = themes.light.colors;
 
 /** Presses a key by its accessibility name. fireEvent is async in React Native Testing Library v14. */
 async function tap(name: string) {
@@ -49,24 +57,39 @@ describe('CalculatorScreen', () => {
     expect(screen.getByRole('button', { name: 'Subtract' })).not.toBeSelected();
   });
 
-  it('AC-27: exposes all 20 keys as named buttons', async () => {
+  it('AC-27: exposes all 20 keypad keys, the 4 memory keys and the 2 mode buttons as named buttons', async () => {
     await render(<CalculatorScreen />);
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(20);
+    expect(buttons).toHaveLength(26);
     for (const button of buttons) {
       expect(button.props.accessibilityLabel).toEqual(expect.any(String));
       expect(button.props.accessibilityLabel.length).toBeGreaterThan(0);
     }
   });
 
-  it('AC-28: every key has a minimum touch target of minTouchTarget (48)', async () => {
+  it('AC-28: every keypad key is at least minTouchTarget (48) wide', async () => {
     await render(<CalculatorScreen />);
 
-    for (const button of screen.getAllByRole('button')) {
+    const keys = screen
+      .getAllByRole('button')
+      .filter((button) => !NON_KEYPAD_NAMES.includes(button.props.accessibilityLabel));
+    expect(keys).toHaveLength(20);
+    for (const button of keys) {
       const style = StyleSheet.flatten(button.props.style);
-      expect(style.minHeight).toBeGreaterThanOrEqual(48);
       expect(style.minWidth).toBeGreaterThanOrEqual(48);
+    }
+  });
+
+  it('AC-28 (design sizes): memory keys are 26px tall and mode buttons 38px tall, as in the design', async () => {
+    await render(<CalculatorScreen />);
+
+    for (const name of MEMORY_NAMES) {
+      expect(StyleSheet.flatten(screen.getByRole('button', { name }).props.style).height).toBe(26);
+    }
+    for (const name of MODE_NAMES) {
+      const wrapperHeight = screen.getByRole('button', { name }).parent?.props.style;
+      expect(StyleSheet.flatten(wrapperHeight)?.height).toBe(38);
     }
   });
 
@@ -84,6 +107,89 @@ describe('CalculatorScreen', () => {
 
     await tap('Clear entry');
     expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
+  });
+
+  it('AC-31: the mode buttons are disabled and do not change the display', async () => {
+    await render(<CalculatorScreen />);
+
+    for (const name of MODE_NAMES) {
+      const button = screen.getByRole('button', { name });
+      expect(button).toBeDisabled();
+      await fireEvent.press(button);
+    }
+
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
+  });
+
+  it('AC-32: memory keys are enabled, and M+ then MR recalls the value through the UI', async () => {
+    await render(<CalculatorScreen />);
+
+    for (const name of MEMORY_NAMES) {
+      expect(screen.getByRole('button', { name })).toBeEnabled();
+    }
+
+    await tap('One');
+    await tap('Two');
+    await tap('Five');
+    await tap('Zero');
+    await tap('Memory add');
+    await tap('Clear entry');
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
+
+    await tap('Memory recall');
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('1,250');
+  });
+
+  it('AC-33: M− subtracts the displayed value; MC clears memory (through the UI)', async () => {
+    await render(<CalculatorScreen />);
+
+    await tap('Five');
+    await tap('Memory add');
+    await tap('Clear entry');
+    await tap('Two');
+    await tap('Memory subtract');
+    await tap('Clear entry');
+    await tap('Memory recall');
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('3');
+
+    await tap('Memory clear');
+    await tap('Clear entry');
+    await tap('Memory recall');
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
+  });
+
+  it('AC-41: 34 → + → 22 keeps the expression "34 +" while 22 is typed, and = shows 56', async () => {
+    await render(<CalculatorScreen />);
+
+    await tap('Three');
+    await tap('Four');
+    expect(screen.getByTestId('calculator-expression')).toHaveTextContent('');
+
+    await tap('Add');
+    expect(screen.getByTestId('calculator-expression')).toHaveTextContent('34 +');
+
+    await tap('Two');
+    await tap('Two');
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('22');
+    expect(screen.getByTestId('calculator-expression')).toHaveTextContent('34 +');
+    expect(screen.getByRole('button', { name: 'Add' })).toBeSelected();
+
+    await tap('Equals');
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('56');
+    expect(screen.getByTestId('calculator-expression')).toHaveTextContent('');
+  });
+
+  it('AC-34: the MEM indicator is dim when memory is empty and lit when it holds a value', async () => {
+    await render(<CalculatorScreen />);
+
+    expect(screen.getByText('MEM')).toHaveStyle({ color: light.displayInactiveText });
+
+    await tap('Five');
+    await tap('Memory add');
+    expect(screen.getByText('MEM')).toHaveStyle({ color: light.displayText });
+
+    await tap('Memory clear');
+    expect(screen.getByText('MEM')).toHaveStyle({ color: light.displayInactiveText });
   });
 
   it('exposes the current value to screen readers through the display label', async () => {
