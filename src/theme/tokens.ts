@@ -79,6 +79,8 @@ export const dimensions = {
   keyHeight: 60,
   keyGap: 8,
   displayMinHeight: 180,
+  /** Smallest scale the display value may shrink to so long numbers stay on one line. */
+  displayMinFontScale: 0.5,
   modeButtonHeight: 48,
   maxContentWidth: 480,
 } as const;

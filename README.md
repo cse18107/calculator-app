@@ -95,7 +95,7 @@ adb devices   # should list emulator-5554 as "device"
 
 | Command                | What it does                        | Status |
 | ---------------------- | ----------------------------------- | ------ |
-| `npm test`             | Run the Jest suite once             | PASS (27 tests) |
+| `npm test`             | Run the Jest suite once             | PASS (76 tests) |
 | `npm run test:watch`   | Run Jest in watch mode              | Not separately run; same suite as `npm test` |
 | `npm run lint`         | ESLint across the project           | PASS (0 problems) |
 | `npm run typecheck`    | `tsc --noEmit` in strict mode       | PASS |
@@ -111,7 +111,7 @@ Results from the setup run on macOS 15.5 (arm64, Apple M2), Node 24.14.0:
 - Type checking: PASS
 - Lint: PASS
 - Formatting: PASS
-- Tests: PASS (3 suites, 27 tests)
+- Tests: PASS (5 suites, 76 tests)
 - Expo Android bundle export: PASS
 - Android emulator (Pixel 8 AVD, API 35, arm64): PASS, booted and detected by adb
 - Native Android build (`npm run android`): PASS (`BUILD SUCCESSFUL`, 16m 58s on first run, including NDK and SDK downloads)
