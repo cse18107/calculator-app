@@ -5,7 +5,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 import { Text } from './Text';
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger';
+type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'info';
 
 export type ButtonProps = Omit<PressableProps, 'children'> & {
   label: string;
@@ -56,6 +56,8 @@ function colorsFor(variant: ButtonVariant, theme: Theme): { background: string; 
       return { background: theme.colors.keyFunction, text: theme.colors.keyFunctionText };
     case 'danger':
       return { background: theme.colors.keyDanger, text: theme.colors.keyDangerText };
+    case 'info':
+      return { background: theme.colors.keyMode, text: theme.colors.keyModeText };
   }
 }
 

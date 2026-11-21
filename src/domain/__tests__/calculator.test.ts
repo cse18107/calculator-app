@@ -300,3 +300,94 @@ describe('engine independence (AC-29)', () => {
     expect(source).not.toMatch(/require\(['"]react/);
   });
 });
+
+describe('completed calculations (history recording)', () => {
+  const multiply: CalculatorAction = { type: 'operator', operator: 'multiply' };
+  const add: CalculatorAction = { type: 'operator', operator: 'add' };
+  const subtract: CalculatorAction = { type: 'operator', operator: 'subtract' };
+  const divide: CalculatorAction = { type: 'operator', operator: 'divide' };
+  const equals: CalculatorAction = { type: 'equals' };
+
+  it('AC-1: 2 × 3 = completes with expression "2 × 3 =" and result 6', () => {
+    const state = press(...typed('2'), multiply, ...typed('3'), equals);
+    expect(state.lastCompletion).toEqual({ expression: '2 × 3 =', result: '6' });
+  });
+
+  it('AC-2: 2 × 3 + 4 = records the whole chain as one completion', () => {
+    const state = press(...typed('2'), multiply, ...typed('3'), add, ...typed('4'), equals);
+    expect(state.lastCompletion).toEqual({ expression: '2 × 3 + 4 =', result: '10' });
+  });
+
+  it('AC-3: repeated equals completes with the previous result, operator and operand', () => {
+    const once = press(...typed('2'), multiply, ...typed('3'), equals);
+    const repeated = run(once, equals);
+    expect(repeated.lastCompletion).toEqual({ expression: '6 × 3 =', result: '18' });
+    expect(primary(repeated)).toBe('18');
+  });
+
+  it('AC-4: percent used as the right operand is recorded with the operand actually used', () => {
+    const state = press(...typed('200'), add, ...typed('10'), { type: 'percent' }, equals);
+    expect(state.lastCompletion).toEqual({ expression: '200 + 20 =', result: '220' });
+  });
+
+  it('AC-5: a calculation that shows Error is not recorded', () => {
+    const state = press(...typed('5'), divide, ...typed('0'), equals);
+    expect(state.status).toBe('error');
+    expect(state.lastCompletion).toBeNull();
+  });
+
+  it('AC-6: keys other than equals never complete a calculation', () => {
+    const state = press(
+      ...typed('5'),
+      add,
+      ...typed('3'),
+      { type: 'percent' },
+      { type: 'toggleSign' },
+      { type: 'backspace' },
+      { type: 'clearEntry' },
+    );
+    expect(state.lastCompletion).toBeNull();
+  });
+
+  it('AC-7: 1250 + 4890.5 = uses thousands separators in the expression and plain result', () => {
+    const state = press(...typed('1250'), add, ...typed('4890.5'), equals);
+    expect(state.lastCompletion).toEqual({ expression: '1,250 + 4,890.5 =', result: '6140.5' });
+    expect(primary(state)).toBe('6,140.5');
+  });
+
+  it('AC-35: equals with nothing pending returns the same state and records nothing', () => {
+    expect(calculatorReducer(initialCalculatorState, equals)).toBe(initialCalculatorState);
+  });
+
+  it('AC-35: equals while the display shows an error does not record', () => {
+    const errored = press(...typed('5'), divide, ...typed('0'), equals);
+    expect(calculatorReducer(errored, equals)).toBe(errored);
+  });
+
+  it('a completion is cleared by the next key press, so it is recorded once', () => {
+    const completed = press(...typed('2'), multiply, ...typed('3'), equals);
+    expect(completed.lastCompletion).not.toBeNull();
+    expect(calculatorReducer(completed, { type: 'digit', digit: '9' }).lastCompletion).toBeNull();
+  });
+
+  it('replacing an operator keeps only the new operator in the expression', () => {
+    const state = press(...typed('2'), add, multiply, ...typed('3'), equals);
+    expect(state.lastCompletion).toEqual({ expression: '2 × 3 =', result: '6' });
+  });
+
+  it('clearing the entry mid-calculation keeps the left operand and records the new entry', () => {
+    const state = press(...typed('2'), multiply, { type: 'clearEntry' }, ...typed('3'), equals);
+    expect(state.lastCompletion).toEqual({ expression: '2 × 3 =', result: '6' });
+  });
+
+  it('equals right after an operator uses the left operand as the right operand', () => {
+    const state = press(...typed('2'), subtract, equals);
+    expect(state.lastCompletion).toEqual({ expression: '2 − 2 =', result: '0' });
+  });
+
+  it('starting a new calculation after a result drops the earlier expression', () => {
+    const completed = press(...typed('2'), multiply, ...typed('3'), equals);
+    const next = run(completed, ...typed('4'), add, ...typed('1'), equals);
+    expect(next.lastCompletion).toEqual({ expression: '4 + 1 =', result: '5' });
+  });
+});

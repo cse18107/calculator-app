@@ -1,6 +1,7 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
+import { touchSlop } from '@/lib/touchTarget';
 import { useTheme } from '@/theme/ThemeProvider';
 
 export type DisplayProps = {
@@ -11,15 +12,29 @@ export type DisplayProps = {
   isError: boolean;
   /** Lights the MEM indicator when memory holds a value. */
   memoryActive: boolean;
+  /** Most recent calculation, e.g. "450 × 8 = 3,600", or null when there is no history. */
+  historyLine: string | null;
+  /** Opens the history screen when the history line is pressed. */
+  onHistoryPress: () => void;
 };
 
 /**
- * LCD-style display panel, as in the design: mode labels on top, the expression
- * line, and the large result value. The history line is reserved for Step 2
- * and stays empty.
+ * LCD-style display panel, as in the design: mode labels on top, the history line,
+ * the expression line, and the large result value. The history line keeps its
+ * height when empty, and is a control when it shows a calculation.
  */
-export function Display({ primary, secondary, isError, memoryActive }: DisplayProps) {
+export function Display({ primary, secondary, isError, memoryActive, historyLine, onHistoryPress }: DisplayProps) {
   const theme = useTheme();
+  const historyText = (
+    <Text size="xs" weight="medium" style={[styles.right, { color: theme.colors.displayHistoryText }]}>
+      {historyLine === null ? ' ' : `HISTORY: ${historyLine}`}
+    </Text>
+  );
+  // Hit slop extends the 12pt line to the minimum touch target without changing its size.
+  const historySlop = touchSlop(
+    Math.round(theme.fontSize.xs * theme.lineHeight.normal),
+    theme.dimensions.minTouchTarget,
+  );
 
   return (
     <View
@@ -54,9 +69,22 @@ export function Display({ primary, secondary, isError, memoryActive }: DisplayPr
       </View>
 
       <View style={[styles.expressionGroup, { gap: theme.spacing.xxs }]}>
-        <Text size="xs" weight="medium" style={[styles.right, { color: theme.colors.displayHistoryText }]}>
-          {' '}
-        </Text>
+        {historyLine === null ? (
+          historyText
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Open calculation history. Latest: ${historyLine}`}
+            hitSlop={{ top: historySlop, bottom: historySlop }}
+            onPress={onHistoryPress}
+            style={({ pressed }) => [
+              styles.historyPressable,
+              { opacity: pressed ? theme.opacity.muted : theme.opacity.full },
+            ]}
+          >
+            {historyText}
+          </Pressable>
+        )}
         <Text
           size="md"
           weight="medium"
@@ -104,5 +132,8 @@ const styles = StyleSheet.create({
   },
   right: {
     textAlign: 'right',
+  },
+  historyPressable: {
+    alignSelf: 'stretch',
   },
 });
