@@ -69,6 +69,17 @@ export type ColorPalette = {
   /** Hard bottom edge under mode buttons. */
   keyModeEdge: string;
 
+  /** Digit keys on the scientific keypad (darker than `keyDigit`, as in the FX-990 design). */
+  keyScientificDigit: string;
+  keyScientificDigitText: string;
+  /** Hard bottom edge under the scientific digit keys. */
+  keyScientificDigitEdge: string;
+  /** Selected tab of the scientific mode selector (COMP), and its label. */
+  modeTabSelected: string;
+  modeTabSelectedText: string;
+  /** Unselected mode selector tab label (STAT, BASE-N, MATRIX). */
+  modeTabText: string;
+
   /** Outline of the keypad bed. */
   keypadBorder: string;
   /** Memory bar background and outline. */
@@ -119,6 +130,13 @@ export const sageClassic: ColorPalette = {
   keyModeText: '#FFFFFF',
   keyModeEdge: '#285B6B',
 
+  keyScientificDigit: '#6B7362',
+  keyScientificDigitText: '#FFFFFF',
+  keyScientificDigitEdge: '#4A5142',
+  modeTabSelected: '#2C3028',
+  modeTabSelectedText: '#E9EADB',
+  modeTabText: '#CCD1BD',
+
   keypadBorder: '#BCBFAC',
   memoryBar: '#A8AC9A',
   memoryBarBorder: '#9A9E8C',
@@ -163,6 +181,13 @@ export const midnightOled: ColorPalette = {
   keyMode: '#3D7889',
   keyModeText: '#FFFFFF',
   keyModeEdge: '#285B6B',
+
+  keyScientificDigit: '#6B7362',
+  keyScientificDigitText: '#FFFFFF',
+  keyScientificDigitEdge: '#4A5142',
+  modeTabSelected: '#2C3028',
+  modeTabSelectedText: '#E9EADB',
+  modeTabText: '#CCD1BD',
 
   keypadBorder: '#BCBFAC',
   memoryBar: '#A8AC9A',

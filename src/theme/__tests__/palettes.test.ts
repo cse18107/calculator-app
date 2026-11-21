@@ -33,9 +33,11 @@ const DOCUMENTED_DESIGN_CONTRAST_GAPS: Record<string, readonly string[]> = {
     'textSecondary/background',
     // Calculation history line (Step 2). Same colour as the design; see the spec's accessibility exception.
     'displayHistoryText/displayBackground',
+    // Unselected scientific mode tabs (STAT, BASE-N, MATRIX). Same colour as the design; see the spec's accessibility review.
+    'modeTabText/memoryKey',
   ],
   // midnightOled reuses light values until a dark design exists (see palettes.ts), so its gaps are listed too.
-  midnightOled: ['displayHistoryText/displayBackground', 'textPrimary/memoryBar'],
+  midnightOled: ['displayHistoryText/displayBackground', 'textPrimary/memoryBar', 'modeTabText/memoryKey'],
 };
 
 const CONTRAST_PAIRS = [
@@ -53,6 +55,9 @@ const CONTRAST_PAIRS = [
   ['keyAccent', 'displayBackground'],
   ['background', 'textPrimary'],
   ['textPrimary', 'memoryBar'],
+  ['keyScientificDigitText', 'keyScientificDigit'],
+  ['modeTabSelectedText', 'modeTabSelected'],
+  ['modeTabText', 'memoryKey'],
 ] as const;
 
 describe.each(Object.entries(palettes))('%s palette', (name, palette) => {

@@ -4,14 +4,19 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 import { PlaceholderButton } from './PlaceholderButton';
 
-/** Converter and Scientific buttons at the bottom of the keypad. Visual only until those features are built. */
-export function ModeRow() {
+export type ModeRowProps = {
+  /** Opens scientific mode. The Converter button stays disabled until Step 4. */
+  onScientificPress?: () => void;
+};
+
+/** Converter and Scientific buttons at the bottom of the keypad. */
+export function ModeRow({ onScientificPress }: ModeRowProps) {
   const theme = useTheme();
 
   return (
     <View style={{ flexDirection: 'row', gap: theme.dimensions.keyGap }}>
       <PlaceholderButton label="CONVERTER" accessibilityLabel="Converter" icon="globe" />
-      <PlaceholderButton label="SCIENTIFIC" accessibilityLabel="Scientific" icon="atom" />
+      <PlaceholderButton label="SCIENTIFIC" accessibilityLabel="Scientific" icon="atom" onPress={onScientificPress} />
     </View>
   );
 }

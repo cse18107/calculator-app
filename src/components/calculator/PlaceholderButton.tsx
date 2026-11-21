@@ -7,16 +7,19 @@ import { CalculatorIcon, type CalculatorIconName } from './CalculatorIcon';
 
 export type PlaceholderButtonProps = {
   accessibilityLabel: string;
-  label: string;
+  /** Text label. Optional for icon-only buttons. */
+  label?: string;
   /** Icon shown before the label. */
   icon?: CalculatorIconName;
+  /** Opens the feature. Without it the button is disabled (Converter, until Step 4). */
+  onPress?: () => void;
 };
 
 /**
- * Visual-only mode button for a feature that is not built yet (Converter, Scientific).
- * It always has `disabled` set and no action. Sizes and colours follow the design.
+ * Mode button (Converter, Scientific). Without `onPress` it is a disabled placeholder
+ * for a feature that is not built yet. Sizes and colours follow the design.
  */
-export function PlaceholderButton({ accessibilityLabel, label, icon }: PlaceholderButtonProps) {
+export function PlaceholderButton({ accessibilityLabel, label, icon, onPress }: PlaceholderButtonProps) {
   const theme = useTheme();
   const shadow = theme.elevation.key;
 
@@ -37,8 +40,9 @@ export function PlaceholderButton({ accessibilityLabel, label, icon }: Placehold
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        accessibilityState={{ disabled: true }}
-        disabled
+        accessibilityState={{ disabled: onPress === undefined }}
+        disabled={onPress === undefined}
+        onPress={onPress}
         style={[
           styles.mode,
           {
@@ -54,9 +58,11 @@ export function PlaceholderButton({ accessibilityLabel, label, icon }: Placehold
         ]}
       >
         {icon ? <CalculatorIcon name={icon} size={theme.iconSize.button} color={theme.colors.keyModeText} /> : null}
-        <Text size="label" weight="bold" style={[styles.label, { color: theme.colors.keyModeText }]}>
-          {label}
-        </Text>
+        {label === undefined ? null : (
+          <Text size="label" weight="bold" style={[styles.label, { color: theme.colors.keyModeText }]}>
+            {label}
+          </Text>
+        )}
       </Pressable>
     </View>
   );
