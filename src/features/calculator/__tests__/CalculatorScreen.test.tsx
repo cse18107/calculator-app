@@ -124,16 +124,36 @@ describe('CalculatorScreen', () => {
     expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
   });
 
-  it('AC-31: the mode buttons are disabled and do not change the display', async () => {
+  it('AC-31: the Converter button stays disabled and does not change the display', async () => {
     await renderCalculator();
 
-    for (const name of MODE_NAMES) {
-      const button = screen.getByRole('button', { name });
-      expect(button).toBeDisabled();
-      await fireEvent.press(button);
-    }
+    const button = screen.getByRole('button', { name: 'Converter' });
+    expect(button).toBeDisabled();
+    await fireEvent.press(button);
 
     expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
+  });
+
+  it('Step 3 AC-1: the Scientific button opens scientific mode with 0 and no expression', async () => {
+    await renderCalculator();
+
+    expect(screen.getByRole('button', { name: 'Scientific' })).toBeEnabled();
+    await tap('Scientific');
+
+    expect(screen.getByTestId('scientific-display')).toHaveTextContent('0');
+    expect(screen.getByTestId('scientific-expression')).toHaveTextContent('');
+    expect(screen.getByRole('button', { name: 'Sine' })).toBeEnabled();
+  });
+
+  it('Step 3 AC-30: S button on the scientific screen returns to the standard calculator', async () => {
+    await renderCalculator();
+
+    await tap('Five');
+    await tap('Scientific');
+    await tap('Standard calculator');
+
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('5');
+    expect(screen.queryByTestId('scientific-display')).toBeNull();
   });
 
   it('AC-32: memory keys are enabled, and M+ then MR recalls the value through the UI', async () => {

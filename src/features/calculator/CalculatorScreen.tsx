@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { BrandBadge } from '@/components/calculator/BrandBadge';
@@ -12,6 +13,7 @@ import { historyLine } from '@/domain/history';
 import { hasMemoryValue } from '@/domain/memory';
 import { useTheme } from '@/theme/ThemeProvider';
 
+import { ScientificScreen } from '../scientific/ScientificScreen';
 import { useAppState } from './useAppState';
 
 /**
@@ -20,14 +22,20 @@ import { useAppState } from './useAppState';
  * proportion, so the layout fills tall and short phones alike. Each has a minimum
  * height, and the content scrolls on very short screens instead of clipping.
  * Reads the shared app state and opens the history screen.
+ * The SCIENTIFIC button switches this route to the scientific screen (Step 3).
  */
 export function CalculatorScreen() {
   const theme = useTheme();
   const { state, dispatch } = useAppState();
+  const [mode, setMode] = useState<'standard' | 'scientific'>('standard');
   const display = getDisplay(state.calc);
   const activeOperator = getPendingOperator(state.calc);
 
   const openHistory = () => router.push('/history');
+
+  if (mode === 'scientific') {
+    return <ScientificScreen onStandardPress={() => setMode('standard')} onHistoryPress={openHistory} />;
+  }
 
   return (
     <ScreenContainer>
@@ -49,6 +57,7 @@ export function CalculatorScreen() {
         <Keypad
           activeOperator={activeOperator}
           onAction={dispatch}
+          onScientificPress={() => setMode('scientific')}
           style={{ flex: theme.layout.keypadFlex, marginTop: theme.spacing.xxl }}
         />
       </ScrollView>

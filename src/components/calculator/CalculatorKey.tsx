@@ -6,11 +6,18 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 import { CalculatorIcon, type CalculatorIconName } from './CalculatorIcon';
 
-export type KeyTone = 'digit' | 'function' | 'accent' | 'danger';
+/**
+ * - `digit`, `function`, `accent`, `danger`: the standard keypad.
+ * - `scientificDigit`: digit keys on the scientific keypad.
+ * - `mode`: the teal scientific function keys and the placeholder keys.
+ */
+export type KeyTone = 'digit' | 'function' | 'accent' | 'danger' | 'scientificDigit' | 'mode';
 
 export type CalculatorKeyProps = {
   accessibilityLabel: string;
   tone: KeyTone;
+  /** A key with no action yet. It keeps its look and ignores presses. */
+  disabled?: boolean;
   /** Text label. Ignored when `icon` is set. */
   label?: string;
   /** Icon shown instead of the text label (e.g. backspace). */
@@ -31,6 +38,7 @@ export type CalculatorKeyProps = {
 export function CalculatorKey({
   accessibilityLabel,
   tone,
+  disabled = false,
   label,
   icon,
   labelSize = 'keyDigit',
@@ -59,17 +67,19 @@ export function CalculatorKey({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        accessibilityState={{ selected }}
+        accessibilityState={{ selected, disabled }}
+        disabled={disabled}
         onPress={onPress}
         style={({ pressed }) => [
           styles.key,
           {
             minWidth: theme.dimensions.minTouchTarget,
+            minHeight: theme.dimensions.minTouchTarget,
             borderRadius: theme.dimensions.keyRadius,
             backgroundColor: colors.background,
             borderWidth: selected ? theme.spacing.xxs : 0,
             borderColor: selected ? theme.colors.focus : colors.background,
-            opacity: pressed ? theme.opacity.pressed : theme.opacity.full,
+            opacity: disabled ? theme.opacity.disabled : pressed ? theme.opacity.pressed : theme.opacity.full,
             shadowColor: shadow.shadowColor,
             shadowOpacity: shadow.shadowOpacity,
             shadowRadius: shadow.shadowRadius,
@@ -104,6 +114,14 @@ function toneColors(tone: KeyTone, theme: Theme): { background: string; text: st
       return { background: theme.colors.keyAccent, text: theme.colors.keyAccentText, edge: theme.colors.keyAccentEdge };
     case 'danger':
       return { background: theme.colors.keyDanger, text: theme.colors.keyDangerText, edge: theme.colors.keyDangerEdge };
+    case 'scientificDigit':
+      return {
+        background: theme.colors.keyScientificDigit,
+        text: theme.colors.keyScientificDigitText,
+        edge: theme.colors.keyScientificDigitEdge,
+      };
+    case 'mode':
+      return { background: theme.colors.keyMode, text: theme.colors.keyModeText, edge: theme.colors.keyModeEdge };
   }
 }
 

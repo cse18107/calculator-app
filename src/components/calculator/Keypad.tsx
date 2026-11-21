@@ -110,6 +110,8 @@ export type KeypadProps = {
   onAction: (action: CalculatorAction) => void;
   /** Operator waiting for its right operand, if any. */
   activeOperator: Operator | null;
+  /** Opens scientific mode from the Scientific button. */
+  onScientificPress?: () => void;
   /** Layout from the parent screen (e.g. the flex share of spare height). */
   style?: StyleProp<ViewStyle>;
 };
@@ -118,7 +120,7 @@ export type KeypadProps = {
  * The keypad bed: five key rows and the Converter/Scientific row, as in the design.
  * Holds layout only; all logic lives in `src/domain/`.
  */
-export function Keypad({ onAction, activeOperator, style }: KeypadProps) {
+export function Keypad({ onAction, activeOperator, onScientificPress, style }: KeypadProps) {
   const theme = useTheme();
   // Smallest bed that still fits every row at touch-target height plus the mode row.
   const minHeight =
@@ -164,7 +166,7 @@ export function Keypad({ onAction, activeOperator, style }: KeypadProps) {
           ))}
         </View>
       ))}
-      <ModeRow />
+      <ModeRow onScientificPress={onScientificPress} />
     </View>
   );
 }

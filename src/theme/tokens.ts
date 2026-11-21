@@ -57,6 +57,18 @@ export const fontSize = {
   xl: 28,
   /** 54px: display value. */
   display: 54,
+  /** 46px: scientific mode display value (FX-990 design). */
+  displayScientific: 46,
+  /** 15px: scientific expression line. */
+  scientificExpression: 15,
+  /** 15px: scientific trig, log and power keys. */
+  keyScientific: 15,
+  /** 17px: bracket, π, e, √x, x² and % keys on the scientific keypad. */
+  keySymbol: 17,
+  /** 22px: decimal point key on the scientific keypad. */
+  keyDecimal: 22,
+  /** 13px: 2nd and deg keys. */
+  keyDeg: 13,
 } as const;
 
 export const lineHeight = {
@@ -137,6 +149,14 @@ export const dimensions = {
   modeButtonHeight: 38,
   /** Mode button corner radius (design: 10). */
   modeButtonRadius: 10,
+  /** Scientific keypad key height (design: 50). */
+  scientificKeyHeight: 50,
+  /** Gap between scientific keypad keys and between its rows (design: 8). */
+  scientificKeyGap: 8,
+  /** Scientific mode selector bar height (design: 32). */
+  modeSelectorHeight: 32,
+  /** Gap between the scientific mode selector tabs (design: 6). */
+  modeSelectorTabGap: 6,
   /** Mode button hard bottom edge, in px (design: 2.5). */
   modeEdgeOffset: 2.5,
   /** Tape Record filter tab height (design: 26). */
