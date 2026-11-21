@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Context
 
-A mobile calculator app (Android and iOS) built with React Native, Expo SDK 58, and TypeScript. It is currently a foundation only: tooling, design tokens, UI primitives, tests, and a placeholder home screen. Calculator features are built later from approved specs in `specs/`, using the screens in `designs/` as the visual source of truth.
+A mobile calculator app (Android and iOS) built with React Native, Expo SDK 58, and TypeScript. It is currently a foundation only: tooling, design tokens, UI primitives, tests, and a placeholder home screen. Calculator features are built later from approved specs in `.claude/specs/`, using the screens in `designs/` as the visual source of truth.
 
 ## Architecture
 
@@ -16,7 +16,7 @@ Explain where things belong:
 - Reusable design-system primitives live in `src/components/ui/` (`Text`, `Surface`, `Button`, `ScreenContainer`).
 - Shared hooks live in `src/hooks/` and pure utilities in `src/lib/` (both planned, empty).
 - Design tokens and theming live in `src/theme/`: `tokens.ts` (non-colour values), `palettes.ts` (colours for `sageClassic` light and `midnightOled` dark), `theme.ts` (combines them), and `ThemeProvider.tsx` (picks the mode from the system colour scheme).
-- Specs live in `specs/` (workflow in `specs/README.md`, required sections in `specs/TEMPLATE.md`). Assets are in `assets/`; UI references in `designs/`.
+- Specs live in `.claude/specs/`. The required spec structure is defined in `.claude/commands/create-spec.md`. Assets are in `assets/`; UI references in `designs/`.
 
 Dependency direction is one way: `app` → `features` → `components` / `hooks` / `domain` → `theme` / `lib`. Lower layers must never import from higher ones. `import/no-cycle` is an ESLint error.
 
@@ -62,7 +62,7 @@ Run lint and typecheck before declaring a task done.
 
 ## Critical Rules
 
-- Do not implement calculator features without an approved spec in `specs/` (`Status: Approved`).
+- Do not implement calculator features without an approved spec in `.claude/specs/` (`Status: Approved`).
 - Do not create or hand-edit `ios/` or `android/`. They are generated (Continuous Native Generation). Configure native behaviour in `app.json` and config plugins. `android/` exists locally but is not tracked in git.
 - Expo Go does not include third-party native modules. Any library with native code needs a development build (`npm run android` or `eas build --profile development`).
 - Do not edit `expo-env.d.ts`; it is generated and gitignored.
@@ -73,16 +73,16 @@ Run lint and typecheck before declaring a task done.
 
 ## Implementation Roadmap
 
-Each step needs its own spec in `specs/` (`Status: Approved`) before any code is written. Design references are in `designs/`.
+Each step needs its own spec in `.claude/specs/` (`Status: Approved`) before any code is written. Design references are in `designs/`.
 
-| Step | Feature | Design reference | Spec | Status |
-|---|---|---|---|---|
-| 0 | Foundation: tooling, tokens, UI primitives, tests, placeholder home | — | — | Done |
-| 1 | Standard calculator: keypad and calculation engine (`src/domain/`) | `Column - Basic calculator@1.5x.png` | `specs/standard-calculator.md` (not written) | Not started |
-| 2 | Calculation history | `Column - Calculation History@1.5x.png` | Not written | Not started; depends on Step 1 |
-| 3 | Scientific calculator and advanced maths functions | `iPhone - Scientific calculator@1.5x.png` | Not written | Not started; depends on Step 1 |
-| 4 | Converter (currency picker, `State=Open` dropdown) | `Column - Converter@1.5x.png`, `State=Open@1.5x.png` | Not written | Not started; needs a rate data source decision |
-| 5 | User-selected themes | `iPhone - Themes@1.5x.png` | Not written | Not started; `ThemeProvider` is system-only today; persistence may need a deferred library |
+| Step | Feature                                                             | Design reference                                     | Spec                                         | Status                                                                                     |
+| ---- | ------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 0    | Foundation: tooling, tokens, UI primitives, tests, placeholder home | —                                                    | —                                            | Done                                                                                       |
+| 1    | Standard calculator: keypad and calculation engine (`src/domain/`)  | `Column - Basic calculator@1.5x.png`                 | `.claude/specs/01-standard-calculator.md` (not written) | Not started                                                                                |
+| 2    | Calculation history                                                 | `Column - Calculation History@1.5x.png`              | Not written                                  | Not started; depends on Step 1                                                             |
+| 3    | Scientific calculator and advanced maths functions                  | `iPhone - Scientific calculator@1.5x.png`            | Not written                                  | Not started; depends on Step 1                                                             |
+| 4    | Converter (currency picker, `State=Open` dropdown)                  | `Column - Converter@1.5x.png`, `State=Open@1.5x.png` | Not written                                  | Not started; needs a rate data source decision                                             |
+| 5    | User-selected themes                                                | `iPhone - Themes@1.5x.png`                           | Not written                                  | Not started; `ThemeProvider` is system-only today; persistence may need a deferred library |
 
 Notes:
 
@@ -90,4 +90,4 @@ Notes:
 - Step 1 is the first real feature. Steps 2 and 3 build on its engine, so they should not start before it is approved.
 - Step 3 (advanced maths) is listed in the project brief but has no design file. Its spec must define the scope.
 - Step 5 needs a decision on how the chosen theme is stored. The library choice goes into that feature's spec, not here.
-- Update the Status column when a spec is `Implemented`, following `specs/README.md`.
+- Update the Status column when a spec is `Implemented`, following the status values in `.claude/commands/create-spec.md`.
