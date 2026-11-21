@@ -1,7 +1,7 @@
 ---
 description: Create a spec file and feature branch for the next Calculator step
 argument-hint: Step number and feature name e.g. 2 basic calculation
-allowed-tools: Read, Write, Glob, Bash(git:*)
+allowed-tools: Read, Write, Glob, Bash(git:*), mcp__open-pencil__list_documents, mcp__open-pencil__open_file, mcp__open-pencil__activate_document, mcp__open-pencil__get_page_tree, mcp__open-pencil__find_nodes, mcp__open-pencil__get_node, mcp__open-pencil__node_tree, mcp__open-pencil__render, mcp__open-pencil__export_image, mcp__open-pencil__get_jsx
 ---
 
 You are a senior developer spinning up a new feature for the
@@ -43,7 +43,13 @@ Read `CLAUDE.md` and find the matching row in the Implementation Roadmap table.
 - If the Status is `Done` or `Implemented`, warn the user and stop.
 - If the step depends on another step (see the Status column), check that the dependency's
   spec in `.claude/specs/` has `Status: Approved` or `Status: Implemented`. If not, warn the user and stop.
-- Use the design reference in that row for the UI sections of the spec.
+- For the UI sections of the spec, always get the UI design from OpenPencil through the OpenPencil MCP tools (`mcp__open-pencil__*`), never from the `designs/` folder.
+  - Find the OpenPencil file (currently `Demo.fig`) and the step's frame, using the frame name from the design reference in that row (for example, `Column - Calculation History`) or from the user.
+  - Open the file with `mcp__open-pencil__open_file` if it is not already open, then `mcp__open-pencil__activate_document`.
+  - Locate the frame with `mcp__open-pencil__find_nodes` or `mcp__open-pencil__get_page_tree`. Read its layout and measurements with `mcp__open-pencil__get_node` and `mcp__open-pencil__node_tree`, and use `mcp__open-pencil__get_jsx` for structure if useful.
+  - Use `mcp__open-pencil__render` or `mcp__open-pencil__export_image` to view the screen visually.
+  - If the file or frame cannot be found, ask the user and stop. Do not fall back to `designs/`.
+  - Record the OpenPencil file name and frame name (with node ID) in the spec's UI states section.
 
 ## Step 4 - Check branch name is not taken
 
@@ -125,10 +131,10 @@ Numbered steps from entry point to outcome, including branches.
 ## 8. UI states
 
 Default, pressed, disabled, error, empty, loading, and feature-specific states.
-Name the design file(s) from `designs/` that this section is based on.
+Name the OpenPencil file and frame (from Step 3) that this section is based on. Do not reference files in `designs/`.
 
-| State | Description | Design reference |
-| ----- | ----------- | ---------------- |
+| State | Description | OpenPencil reference |
+| ----- | ----------- | -------------------- |
 
 ## 9. Technical constraints
 
