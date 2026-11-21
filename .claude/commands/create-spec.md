@@ -9,6 +9,8 @@ Calculator mobile app. Always follow the rules in CLAUDE.md.
 
 User input: $ARGUMENTS
 
+All specs live in `.claude/specs/`. Do not create or use a `specs/` folder at the project root.
+
 ## Step 1 - Check working directory is clean
 
 Run `git status` and check for uncommitted, unstaged, or untracked files.
@@ -28,20 +30,28 @@ From $ARGUMENTS extract:
    - Lowercase, kebab-case
    - Only a-z, 0-9 and -
    - Maximum 40 characters
-   - Example: registration, login-logout
+   - Example: basic-calculation, scientific-mode
 
 4. `branch_name` - format: `feature/<feature_slug>`
    - Example: `feature/basic-calculation`
 
 If you cannot infer these from $ARGUMENTS, ask the user to clarify before proceeding.
 
-## Step 3 - Check branch name is not taken
+## Step 3 - Check the step is not already done or blocked
 
-Run `git branch` to list existing branches.
-If `branch_name` is already taken, append a number:
-`feature/basic-calculation-01`, `feature/basic-calculation-02` etc.
+Read `CLAUDE.md` and find the matching row in the Implementation Roadmap table.
+- If the Status is `Done` or `Implemented`, warn the user and stop.
+- If the step depends on another step (see the Status column), check that the dependency's
+  spec in `.claude/specs/` has `Status: Approved` or `Status: Implemented`. If not, warn the user and stop.
+- Use the design reference in that row for the UI sections of the spec.
 
-## Step 4 - Switch to main and pull latest
+## Step 4 - Check branch name is not taken
+
+Run `git branch --list "<branch_name>"` and `git ls-remote --heads origin "<branch_name>"`.
+If either returns a result, append a number and check again:
+`feature/basic-calculation-01`, `feature/basic-calculation-02`, and so on.
+
+## Step 5 - Switch to main and pull latest
 
 Run:
 
@@ -50,7 +60,7 @@ git checkout main
 git pull origin main
 ```
 
-## Step 5 - Create and switch to feature branch
+## Step 6 - Create and switch to feature branch
 
 Run:
 
@@ -58,53 +68,102 @@ Run:
 git checkout -b <branch_name>
 ```
 
-## Step 6 - Research the codebase
+## Step 7 - Research existing specs
 
-Read these files before writing the spec:
+Read:
 
-- `CLAUDE.md` - roadmap, conventions.
-- All files in `.claude/specs/` - avoid duplicating existing specs
+- `CLAUDE.md` - roadmap, conventions, and critical rules.
+- All files matching `.claude/specs/*.md` - avoid duplicating existing specs and reuse their terms.
 
-Check `CLAUDE.md` to confirm the requested step is not already
-marked complete. If it is, warn the user and stop
+## Step 8 - Write the spec
 
-## Step 7 - Write the spec
+Create `.claude/specs/<step_number>-<feature_slug>.md` using exactly this structure.
+Keep every section. Write `Not applicable` only when a section truly does not apply.
 
-Generate a spec document with this exact structure:
+```markdown
+# <feature_title>
 
----
+Status: Draft
+Step: <step_number>
+Owner: TBD
+Last updated: <today's date, YYYY-MM-DD>
 
-# Sepc: <feature_title>
+## 1. Overview
 
-## Overview
+One paragraph: what this feature does and why it exists at this point in the roadmap.
 
-One paragraph describing what this feature does and why
-it exists at this stage of the Calculator app roadmap.
+## 2. Goals
 
-## Depends on
+- Measurable outcome 1
 
-Which previous steps this feature requires to be complete.
+## 3. Scope
 
-## Files to change
+**In scope**
 
-Every file that will be modified.
+- ...
 
-## Files to create
+**Out of scope**
 
-Every new file that will be created.
+- ...
 
-## Definition of done
+## 4. Functional requirements
 
-A specific testable checklist. Each item must be something that can be verified by running the app.
----
+Numbered, testable statements. Use FR-1, FR-2, ...
 
-## Step 8 - Save the spec
+## 5. Non-functional requirements
 
-Save to: `.claude/specs/<step_number>-<feature_slug>.md`
+Performance, accessibility, platform differences (Android/iOS). Use NFR-1, NFR-2, ...
+
+## 6. User stories
+
+- As a <user>, I want <capability>, so that <benefit>.
+
+## 7. User flows
+
+Numbered steps from entry point to outcome, including branches.
+
+## 8. UI states
+
+Default, pressed, disabled, error, empty, loading, and feature-specific states.
+Name the design file(s) from `designs/` that this section is based on.
+
+| State | Description | Design reference |
+| ----- | ----------- | ---------------- |
+
+## 9. Technical constraints
+
+- Files to change (existing files this feature modifies)
+- Files to create (new files this feature adds)
+- Business logic goes in `src/domain/` (pure TypeScript, no React imports)
+- Styling uses tokens from `src/theme/`. No hardcoded colours, spacing, font sizes, or durations.
+- Routes go in `src/app/`. New dependencies only if the feature needs them.
+
+## 10. Edge cases
+
+- ...
+
+## 11. Acceptance criteria
+
+Each criterion is checkable and maps to at least one test in section 12.
+
+- [ ] AC-1: Given ..., when ..., then ...
+
+## 12. Testing requirements
+
+- Unit tests (`src/domain/`): ...
+- Component tests (`__tests__/`, `@testing-library/react-native`): ...
+- Manual checks on the Android emulator: ...
+- Open questions: any decision still unknown. Do not invent answers.
+```
+
+Rules for the spec:
+- Write only this spec file. Do not create or edit code, the roadmap table, or any other file.
+- Do not set `Status: Approved`. Only the user does that after review.
+- Every acceptance criterion must map to at least one test.
 
 ## Step 9 - Report to the user
 
-Print a short summary in this exact format:
+Print exactly this:
 
 ```
 Branch: <branch_name>
@@ -113,7 +172,11 @@ Title: <feature_title>
 ```
 
 Then tell the user:
-"Review the spec at `.claude/specs/<step_number>-<feature_slug>.md`
-then enter Plan Mode with Shift+Tab twice to begin implementation."
+
+"Review the spec at `.claude/specs/<step_number>-<feature_slug>.md`. When it is ready, change
+`Status: Draft` to `Status: Approved`. Only then start implementation, using Plan Mode
+(Shift+Tab twice)."
+
+List any open questions from section 12 in your reply.
 
 Do not print the full spec in chat unless explicitly asked.
