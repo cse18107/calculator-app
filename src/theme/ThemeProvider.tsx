@@ -11,7 +11,7 @@ const ThemeContext = createContext<Theme>(themes.light);
  */
 export function ThemeProvider({ children }: PropsWithChildren) {
   const scheme = useColorScheme();
-  const theme = useMemo(() => (scheme === 'dark' ? themes.dark : themes.light), [scheme]);
+  const theme = useMemo(() => themes.light, [scheme]);
 
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
 }

@@ -1,17 +1,29 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 
-import HomeScreen from '@/app/index';
+import IndexRoute from '@/app/index';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 
-describe('HomeScreen placeholder', () => {
-  it('renders the app title and foundation status inside the theme provider', async () => {
+describe('Home route', () => {
+  it('renders the calculator with a 0 display inside the theme provider', async () => {
     await render(
       <ThemeProvider>
-        <HomeScreen />
+        <IndexRoute />
       </ThemeProvider>,
     );
 
-    expect(screen.getByText('Calculator')).toBeOnTheScreen();
-    expect(screen.getByText(/Foundation ready/)).toBeOnTheScreen();
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('0');
+    expect(screen.getByRole('button', { name: 'Equals' })).toBeOnTheScreen();
+  });
+
+  it('accepts key presses from the home route', async () => {
+    await render(
+      <ThemeProvider>
+        <IndexRoute />
+      </ThemeProvider>,
+    );
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Nine' }));
+
+    expect(screen.getByTestId('calculator-display')).toHaveTextContent('9');
   });
 });

@@ -2,8 +2,8 @@ import { type ColorPalette, midnightOled, sageClassic } from './palettes';
 import {
   dimensions,
   elevation,
+  fontFamily,
   fontSize,
-  fontWeight,
   iconSize,
   layout,
   letterSpacing,
@@ -21,8 +21,8 @@ export type Theme = {
   colors: ColorPalette;
   spacing: typeof spacing;
   radius: typeof radius;
+  fontFamily: typeof fontFamily;
   fontSize: typeof fontSize;
-  fontWeight: typeof fontWeight;
   lineHeight: typeof lineHeight;
   letterSpacing: typeof letterSpacing;
   opacity: typeof opacity;
@@ -36,8 +36,8 @@ export type Theme = {
 const sharedTokens = {
   spacing,
   radius,
+  fontFamily,
   fontSize,
-  fontWeight,
   lineHeight,
   letterSpacing,
   opacity,
