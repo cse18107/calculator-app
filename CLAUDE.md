@@ -70,3 +70,24 @@ Run lint and typecheck before declaring a task done.
 - Do not hardcode design values in components. Add new values to `src/theme/` instead.
 - Keep the palette keys of `sageClassic` and `midnightOled` identical; `palettes.test.ts` enforces this and WCAG AA contrast (4.5:1) for key text pairs.
 - Use EAS (`npx eas-cli@latest <command>`) for cloud builds, submission, and OTA updates; do not require local Xcode or Android Studio for release builds.
+
+## Implementation Roadmap
+
+Each step needs its own spec in `specs/` (`Status: Approved`) before any code is written. Design references are in `designs/`.
+
+| Step | Feature | Design reference | Spec | Status |
+|---|---|---|---|---|
+| 0 | Foundation: tooling, tokens, UI primitives, tests, placeholder home | — | — | Done |
+| 1 | Standard calculator: keypad and calculation engine (`src/domain/`) | `Column - Basic calculator@1.5x.png` | `specs/standard-calculator.md` (not written) | Not started |
+| 2 | Calculation history | `Column - Calculation History@1.5x.png` | Not written | Not started; depends on Step 1 |
+| 3 | Scientific calculator and advanced maths functions | `iPhone - Scientific calculator@1.5x.png` | Not written | Not started; depends on Step 1 |
+| 4 | Converter (currency picker, `State=Open` dropdown) | `Column - Converter@1.5x.png`, `State=Open@1.5x.png` | Not written | Not started; needs a rate data source decision |
+| 5 | User-selected themes | `iPhone - Themes@1.5x.png` | Not written | Not started; `ThemeProvider` is system-only today; persistence may need a deferred library |
+
+Notes:
+
+- Step 0 is verified in `README.md` (27 tests, lint, typecheck, and format checks pass). The Android install-and-launch check is still listed as not verified there.
+- Step 1 is the first real feature. Steps 2 and 3 build on its engine, so they should not start before it is approved.
+- Step 3 (advanced maths) is listed in the project brief but has no design file. Its spec must define the scope.
+- Step 5 needs a decision on how the chosen theme is stored. The library choice goes into that feature's spec, not here.
+- Update the Status column when a spec is `Implemented`, following `specs/README.md`.
